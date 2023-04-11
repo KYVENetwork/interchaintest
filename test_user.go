@@ -3,8 +3,6 @@ package interchaintest
 import (
 	"context"
 	"fmt"
-	"testing"
-
 	"github.com/strangelove-ventures/interchaintest/v6/ibc"
 	"github.com/strangelove-ventures/interchaintest/v6/internal/dockerutil"
 	"github.com/strangelove-ventures/interchaintest/v6/testutil"
@@ -42,7 +40,7 @@ func GetAndFundTestUserWithMnemonic(
 // GetAndFundTestUsers generates and funds chain users with the native chain denom.
 // The caller should wait for some blocks to complete before the funds will be accessible.
 func GetAndFundTestUsers(
-	t *testing.T,
+	t require.TestingT,
 	ctx context.Context,
 	keyNamePrefix string,
 	amount int64,
