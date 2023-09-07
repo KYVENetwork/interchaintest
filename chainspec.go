@@ -133,10 +133,21 @@ func (s *ChainSpec) applyConfigOverrides(cfg ibc.ChainConfig) (*ibc.ChainConfig,
 	if s.NoHostMount != nil {
 		cfg.NoHostMount = *s.NoHostMount
 	}
+	if s.SkipGenTx {
+		cfg.SkipGenTx = true
+	}
 	if s.ModifyGenesis != nil {
 		cfg.ModifyGenesis = s.ModifyGenesis
 	}
+	if s.PreGenesis != nil {
+		cfg.PreGenesis = s.PreGenesis
+	}
+	if s.ModifyGenesisAmounts != nil {
+		cfg.ModifyGenesisAmounts = s.ModifyGenesisAmounts
+	}
+
 	cfg.UsingNewGenesisCommand = s.UsingNewGenesisCommand
+	cfg.UsingChainIDFlagCLI = s.UsingChainIDFlagCLI
 
 	// Set the version depending on the chain type.
 	switch cfg.Type {
