@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	// This must be global for the Makefile to build properly (ldflags).
 	MakeFileInstallDirectory string
 )
 
@@ -41,7 +42,7 @@ func GetDirectory() string {
 		MakeFileInstallDirectory = path.Join(dirname, "local-interchain")
 	}
 
-	if err := directoryRequirementChecks(MakeFileInstallDirectory, "configs", "chains"); err != nil {
+	if err := directoryRequirementChecks(MakeFileInstallDirectory, "chains"); err != nil {
 		log.Fatal(err)
 	}
 

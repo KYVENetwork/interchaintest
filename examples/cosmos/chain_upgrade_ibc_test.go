@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/conformance"
@@ -36,21 +38,12 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 
 	// SDK v45 params for Juno genesis
 	shortVoteGenesis := []cosmos.GenesisKV{
-		{
-			Key:   "app_state.gov.voting_params.voting_period",
-			Value: votingPeriod,
-		},
-		{
-			Key:   "app_state.gov.deposit_params.max_deposit_period",
-			Value: maxDepositPeriod,
-		},
-		{
-			Key:   "app_state.gov.deposit_params.min_deposit.0.denom",
-			Value: "ujuno",
-		},
+		cosmos.NewGenesisKV("app_state.gov.voting_params.voting_period", votingPeriod),
+		cosmos.NewGenesisKV("app_state.gov.deposit_params.max_deposit_period", maxDepositPeriod),
+		cosmos.NewGenesisKV("app_state.gov.deposit_params.min_deposit.0.denom", "ujuno"),
 	}
 
-	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{
+	chains := interchaintest.CreateChainsWithChainSpecs(t, []*interchaintest.ChainSpec{
 		{
 			Name:      chainName,
 			ChainName: chainName,
@@ -65,9 +58,6 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 			Version:   "v7.0.3",
 		},
 	})
-
-	chains, err := cf.Chains(t.Name())
-	require.NoError(t, err)
 
 	client, network := interchaintest.DockerSetup(t)
 
@@ -113,7 +103,7 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 		_ = ic.Close()
 	})
 
-	const userFunds = int64(10_000_000_000)
+	var userFunds = sdkmath.NewInt(10_000_000_000)
 	users := interchaintest.GetAndFundTestUsers(t, ctx, t.Name(), userFunds, chain)
 	chainUser := users[0]
 

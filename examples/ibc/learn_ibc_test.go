@@ -6,9 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/math"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+
+	"cosmossdk.io/math"
+	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	"github.com/strangelove-ventures/interchaintest/v7"
+	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
 	"github.com/stretchr/testify/require"
@@ -76,7 +79,7 @@ func TestLearn(t *testing.T) {
 
 	// Create and Fund User Wallets
 	fundAmount := math.NewInt(10_000_000)
-	users := interchaintest.GetAndFundTestUsers(t, ctx, "default", fundAmount.Int64(), gaia, osmosis)
+	users := interchaintest.GetAndFundTestUsers(t, ctx, "default", fundAmount, gaia, osmosis)
 	gaiaUser := users[0]
 	osmosisUser := users[1]
 
@@ -92,6 +95,9 @@ func TestLearn(t *testing.T) {
 	osmoChannelInfo, err := r.GetChannels(ctx, eRep, osmosis.Config().ChainID)
 	require.NoError(t, err)
 	osmoChannelID := osmoChannelInfo[0].ChannelID
+
+	height, err := osmosis.Height(ctx)
+	require.NoError(t, err)
 
 	// Send Transaction
 	amountToSend := math.NewInt(1_000_000)
@@ -122,4 +128,13 @@ func TestLearn(t *testing.T) {
 	osmosUserBalNew, err := osmosis.GetBalance(ctx, osmosisUser.FormattedAddress(), dstIbcDenom)
 	require.NoError(t, err)
 	require.True(t, osmosUserBalNew.Equal(amountToSend))
+
+	// Validate light client
+	chain := osmosis.(*cosmos.CosmosChain)
+	reg := chain.Config().EncodingConfig.InterfaceRegistry
+	msg, err := cosmos.PollForMessage[*clienttypes.MsgUpdateClient](ctx, chain, reg, height, height+10, nil)
+	require.NoError(t, err)
+
+	require.Equal(t, "07-tendermint-0", msg.ClientId)
+	require.NotEmpty(t, msg.Signer)
 }

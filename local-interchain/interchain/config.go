@@ -43,23 +43,15 @@ func LoadConfig(installDir, chainCfgFile string) (*types.Config, error) {
 	chainsDir := filepath.Join(installDir, "chains")
 	cfgFilePath := filepath.Join(chainsDir, configFile)
 
-	// configs Folder
-	configsDir := filepath.Join(installDir, "configs")
-	relayerFilePath := filepath.Join(configsDir, "relayer.json")
-	serverFilePath := filepath.Join(configsDir, "server.json")
-
 	config, err := loadConfig(config, cfgFilePath)
 	if err != nil {
 		return nil, err
 	}
-	config, _ = loadConfig(config, relayerFilePath)
-	config, _ = loadConfig(config, serverFilePath)
 
 	log.Println("Using directory:", installDir)
 	log.Println("Using chain config:", cfgFilePath)
 
 	chains := config.Chains
-	relayer := config.Relayer
 
 	for i := range chains {
 		chain := chains[i]
@@ -74,8 +66,6 @@ func LoadConfig(installDir, chainCfgFile string) (*types.Config, error) {
 			fmt.Printf("Loaded %v\n", config)
 		}
 	}
-
-	config.Relayer = relayer.SetRelayerDefaults()
 
 	return config, nil
 }
@@ -97,21 +87,20 @@ func FasterBlockTimesBuilder(blockTime string) testutil.Toml {
 
 func CreateChainConfigs(cfg types.Chain) (ibc.ChainConfig, *interchaintest.ChainSpec) {
 	chainCfg := ibc.ChainConfig{
-		Type:                   cfg.ChainType,
-		Name:                   cfg.Name,
-		ChainID:                cfg.ChainID,
-		Bin:                    cfg.Binary,
-		Bech32Prefix:           cfg.Bech32Prefix,
-		Denom:                  cfg.Denom,
-		CoinType:               fmt.Sprintf("%d", cfg.CoinType),
-		GasPrices:              cfg.GasPrices,
-		GasAdjustment:          cfg.GasAdjustment,
-		TrustingPeriod:         cfg.TrustingPeriod,
-		NoHostMount:            false,
-		ModifyGenesis:          cosmos.ModifyGenesis(cfg.Genesis.Modify),
-		ConfigFileOverrides:    FasterBlockTimesBuilder(cfg.BlockTime),
-		EncodingConfig:         nil,
-		UsingNewGenesisCommand: cfg.UseNewGenesisCommand,
+		Type:                cfg.ChainType,
+		Name:                cfg.Name,
+		ChainID:             cfg.ChainID,
+		Bin:                 cfg.Binary,
+		Bech32Prefix:        cfg.Bech32Prefix,
+		Denom:               cfg.Denom,
+		CoinType:            fmt.Sprintf("%d", cfg.CoinType),
+		GasPrices:           cfg.GasPrices,
+		GasAdjustment:       cfg.GasAdjustment,
+		TrustingPeriod:      cfg.TrustingPeriod,
+		NoHostMount:         false,
+		ModifyGenesis:       cosmos.ModifyGenesis(cfg.Genesis.Modify),
+		ConfigFileOverrides: FasterBlockTimesBuilder(cfg.BlockTime),
+		EncodingConfig:      nil,
 	}
 
 	if cfg.DockerImage.Version == "" {

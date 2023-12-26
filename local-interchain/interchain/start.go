@@ -15,10 +15,18 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/strangelove-ventures/localinterchain/interchain/router"
+	"github.com/strangelove-ventures/localinterchain/interchain/types"
 	"go.uber.org/zap"
 )
 
-func StartChain(installDir, chainCfgFile string) {
+type AppConfig struct {
+	Address string
+	Port    uint16
+
+	Relayer types.Relayer
+}
+
+func StartChain(installDir, chainCfgFile string, ac *AppConfig) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -56,6 +64,8 @@ func StartChain(installDir, chainCfgFile string) {
 			panic(err)
 		}
 	}
+
+	config.Relayer = ac.Relayer
 
 	WriteRunningChains(installDir, []byte("{}"))
 
@@ -145,9 +155,14 @@ func StartChain(installDir, chainCfgFile string) {
 			paths = append(paths, k)
 		}
 
-		relayer.StartRelayer(ctx, eRep, paths...)
+		if err := relayer.StartRelayer(ctx, eRep, paths...); err != nil {
+			log.Fatal("relayer.StartRelayer", err)
+		}
+
 		defer func() {
-			relayer.StopRelayer(ctx, eRep)
+			if err := relayer.StopRelayer(ctx, eRep); err != nil {
+				log.Fatal("relayer.StopRelayer", err)
+			}
 		}()
 	}
 
@@ -160,7 +175,19 @@ func StartChain(installDir, chainCfgFile string) {
 
 	// Starts a non blocking REST server to take action on the chain.
 	go func() {
-		r := router.NewRouter(ctx, ic, config, vals, relayer, eRep, installDir)
+		cosmosChains := map[string]*cosmos.CosmosChain{}
+		for _, chain := range chains {
+			if cosmosChain, ok := chain.(*cosmos.CosmosChain); ok {
+				cosmosChains[cosmosChain.Config().ChainID] = cosmosChain
+			}
+		}
+
+		r := router.NewRouter(ctx, ic, config, cosmosChains, vals, relayer, eRep, installDir)
+
+		config.Server = types.RestServer{
+			Host: ac.Address,
+			Port: fmt.Sprintf("%d", ac.Port),
+		}
 
 		server := fmt.Sprintf("%s:%s", config.Server.Host, config.Server.Port)
 		if err := http.ListenAndServe(server, r); err != nil {

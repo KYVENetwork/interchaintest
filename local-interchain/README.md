@@ -2,11 +2,15 @@
 
 A simple way to config and run IBC local chain testing environments with any language of choice for interaction.
 
-## Installing
+## Repository CI
+
+- [**Rust**](./rust/README.md)
+
+## Installing Locally
 
 **Install on Mac / Linux**
 ```bash
-git clone https://github.com/strangelove-ventures/interchaintest.git 
+git clone https://github.com/strangelove-ventures/interchaintest.git
 
 cd interchaintest/local-interchain
 
@@ -20,14 +24,15 @@ Follow [this guide](./docs/WINDOWS.md) to setup the Windows OS environment for i
 
 ## Running
 
-- *(optional)* Edit `./configs/relayer.json`
 - Copy: `cp ./configs/base_ibc.json ./configs/mytest1_ignored.json`
-- Run: `local-ic start mytest1_ignored.json`
-- Run in different directory: `ICTEST_HOME=/root/local-interchain local-ic start myother_ignored.json`
+- Run: `local-ic start mytest1_ignored.json [flags]`
+- Run in different directory: `ICTEST_HOME=/root/local-interchain local-ic start myother_ignored.json [flags]`
+
+Modify the relayer information on `start` with the --relayer-* flags.
 
 **NOTE** The ICTEST_HOME path must contain the directories `chains` and `configs` to be valid.
 
-*(Default: `make install` links to the cloned directory. `go install .` will use your home directory /local-interchain)*
+*(Default: `make install` links to the cloned directory. `go install .` will use your home directory ~/local-interchain)*
 
 *(Ending the config file with `_ignored.json` or `_ignore.json` will ignore it from git)*
 
@@ -35,7 +40,7 @@ Follow [this guide](./docs/WINDOWS.md) to setup the Windows OS environment for i
 
 ## REST API
 
-A rest API can be found at `curl localhost:8080/` by default. Other actions can take place here such as file uploads, actions, querying chain config information, and more!
+A rest API can be found at `curl 127.0.0.1:8080/` by default. Other actions can take place here such as file uploads, actions, querying chain config information, and more!
 
 Read more about the API [here](./docs/REST_API.md)
 
@@ -52,8 +57,8 @@ Read more about the API [here](./docs/REST_API.md)
   {
     "chain_id": "exampleid-1",
     "chain_name": "example",
-    "rpc_address": "http://localhost:38829",
-    "grpc_address": "localhost:34917",
+    "rpc_address": "http://127.0.0.1:38829",
+    "grpc_address": "127.0.0.1:34917",
     "ibc_paths": []
   }
 ]
@@ -67,12 +72,12 @@ Read more about the API [here](./docs/REST_API.md)
 
 ```json
 {
-    "name": "juno",            
+    "name": "juno",
     "chain_id": "localjuno-2",
     "denom": "ujuno",
-    "docker_image": {        
+    "docker_image": {
         "version": "v14.1.0"
-    },    
+    },
     "gas_prices": "0%DENOM%",
     "gas_adjustment": 2.0
 }
@@ -86,7 +91,7 @@ Here is a base chain template with every feature the configuration accepts. Acco
 
 ```json
 {
-    "name": "juno",            
+    "name": "juno",
     "chain_id": "localjuno-1",
     "denom": "ujuno",
     "binary": "junod",
@@ -103,7 +108,6 @@ Here is a base chain template with every feature the configuration accepts. Acco
     "gas_adjustment": 2.0,
     "number_vals": 1,
     "number_node": 0,
-    "use_new_genesis_command": false,
     "ibc_paths": ["juno-ibc-1"],
     "debugging": true,
     "block_time": "500ms",
@@ -122,7 +126,7 @@ Here is a base chain template with every feature the configuration accepts. Acco
                 "key": "app_state.gov.deposit_params.min_deposit.0.denom",
                 "value": "ujuno"
             }
-        ],     
+        ],
         "accounts": [
             {
                 "name": "acc0",
@@ -130,7 +134,7 @@ Here is a base chain template with every feature the configuration accepts. Acco
                 "amount": "10000000%DENOM%",
                 "mnemonic": "decorate bright ozone fork gallery riot bus exhaust worth way bone indoor calm squirrel merry zero scheme cotton until shop any excess stage laundry"
             }
-        ]                
+        ]
     }
 },
 ```

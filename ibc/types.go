@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // ChainConfig defines the chain parameters requires to run an interchaintest testnet for a chain.
@@ -48,12 +48,12 @@ type ChainConfig struct {
 	ConfigFileOverrides map[string]any
 	// Non-nil will override the encoding config, used for cosmos chains only.
 	EncodingConfig *testutil.TestEncodingConfig
-	// Required when the chain uses the new sub commands for genesis (https://github.com/cosmos/cosmos-sdk/pull/14149)
-	UsingNewGenesisCommand bool `yaml:"using-new-genesis-command"`
 	// Required when the chain requires the chain-id field to be populated for certain commands
 	UsingChainIDFlagCLI bool `yaml:"using-chain-id-flag-cli"`
 	// Configuration describing additional sidecar processes.
 	SidecarConfigs []SidecarConfig
+	// CoinDecimals for the chains base micro/nano/atto token configuration.
+	CoinDecimals *int64
 }
 
 func (c ChainConfig) Clone() ChainConfig {
@@ -66,6 +66,11 @@ func (c ChainConfig) Clone() ChainConfig {
 	sidecars := make([]SidecarConfig, len(c.SidecarConfigs))
 	copy(sidecars, c.SidecarConfigs)
 	x.SidecarConfigs = sidecars
+
+	if c.CoinDecimals != nil {
+		coinDecimals := *c.CoinDecimals
+		x.CoinDecimals = &coinDecimals
+	}
 
 	return x
 }
@@ -162,6 +167,10 @@ func (c ChainConfig) MergeChainSpecConfig(other ChainConfig) ChainConfig {
 
 	if len(other.SidecarConfigs) > 0 {
 		c.SidecarConfigs = append([]SidecarConfig(nil), other.SidecarConfigs...)
+	}
+
+	if other.CoinDecimals != nil {
+		c.CoinDecimals = other.CoinDecimals
 	}
 
 	return c
@@ -277,4 +286,14 @@ const (
 type ChannelFilter struct {
 	Rule        string
 	ChannelList []string
+}
+
+type PathUpdateOptions struct {
+	ChannelFilter *ChannelFilter
+	SrcClientID   *string
+	SrcConnID     *string
+	SrcChainID    *string
+	DstClientID   *string
+	DstConnID     *string
+	DstChainID    *string
 }

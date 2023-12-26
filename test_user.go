@@ -18,7 +18,7 @@ import (
 func GetAndFundTestUserWithMnemonic(
 	ctx context.Context,
 	keyNamePrefix, mnemonic string,
-	amount int64,
+	amount math.Int,
 	chain ibc.Chain,
 ) (ibc.Wallet, error) {
 	chainCfg := chain.Config()
@@ -30,7 +30,7 @@ func GetAndFundTestUserWithMnemonic(
 
 	err = chain.SendFunds(ctx, FaucetAccountKeyName, ibc.WalletAmount{
 		Address: user.FormattedAddress(),
-		Amount:  math.NewInt(amount),
+		Amount:  amount,
 		Denom:   chainCfg.Denom,
 	})
 	if err != nil {
@@ -45,7 +45,7 @@ func GetAndFundTestUsers(
 	t require.TestingT,
 	ctx context.Context,
 	keyNamePrefix string,
-	amount int64,
+	amount math.Int,
 	chains ...ibc.Chain,
 ) []ibc.Wallet {
 	users := make([]ibc.Wallet, len(chains))
