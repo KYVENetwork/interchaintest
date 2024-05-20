@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"testing"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -52,7 +51,7 @@ type Broadcaster struct {
 
 // NewBroadcaster returns a instance of Broadcaster which can be used with broadcast.Tx to
 // broadcast messages sdk messages.
-func NewBroadcaster(t *testing.T, chain *CosmosChain) *Broadcaster {
+func NewBroadcaster(t TestingT, chain *CosmosChain) *Broadcaster {
 	return &Broadcaster{
 		t:        t,
 		chain:    chain,
