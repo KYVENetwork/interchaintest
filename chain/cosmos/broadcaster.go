@@ -28,6 +28,10 @@ type User interface {
 	FormattedAddress() string
 }
 
+type TestingT interface {
+	TempDir() string
+}
+
 type Broadcaster struct {
 	// buf stores the output sdk.TxResponse when broadcast.Tx is invoked.
 	buf *bytes.Buffer
@@ -38,7 +42,7 @@ type Broadcaster struct {
 	// chain is a reference to the CosmosChain instance which will be the target of the messages.
 	chain *CosmosChain
 	// t is the testing.T for the current test.
-	t *testing.T
+	t TestingT
 
 	// factoryOptions is a slice of broadcast.FactoryOpt which enables arbitrary configuration of the tx.Factory.
 	factoryOptions []FactoryOpt
