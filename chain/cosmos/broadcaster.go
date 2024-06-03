@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"testing"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -28,6 +27,10 @@ type User interface {
 	FormattedAddress() string
 }
 
+type TestingT interface {
+	TempDir() string
+}
+
 type Broadcaster struct {
 	// buf stores the output sdk.TxResponse when broadcast.Tx is invoked.
 	buf *bytes.Buffer
@@ -38,7 +41,7 @@ type Broadcaster struct {
 	// chain is a reference to the CosmosChain instance which will be the target of the messages.
 	chain *CosmosChain
 	// t is the testing.T for the current test.
-	t *testing.T
+	t TestingT
 
 	// factoryOptions is a slice of broadcast.FactoryOpt which enables arbitrary configuration of the tx.Factory.
 	factoryOptions []FactoryOpt
@@ -48,7 +51,7 @@ type Broadcaster struct {
 
 // NewBroadcaster returns a instance of Broadcaster which can be used with broadcast.Tx to
 // broadcast messages sdk messages.
-func NewBroadcaster(t *testing.T, chain *CosmosChain) *Broadcaster {
+func NewBroadcaster(t TestingT, chain *CosmosChain) *Broadcaster {
 	return &Broadcaster{
 		t:        t,
 		chain:    chain,

@@ -3,13 +3,12 @@ package interchaintest
 import (
 	"context"
 	"fmt"
-	"testing"
 
 	"cosmossdk.io/math"
 	"github.com/strangelove-ventures/interchaintest/v8/dockerutil"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
-	"github.com/stretchr/testify/require"
+	require "github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -51,7 +50,7 @@ func GetAndFundTestUserWithMnemonic(
 // GetAndFundTestUsers generates and funds chain users with the native chain denom.
 // The caller should wait for some blocks to complete before the funds will be accessible.
 func GetAndFundTestUsers(
-	t *testing.T,
+	t require.TestingT,
 	ctx context.Context,
 	keyNamePrefix string,
 	amount math.Int,
